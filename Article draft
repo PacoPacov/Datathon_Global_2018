@@ -1,0 +1,74 @@
+1. Business Understanding
+
+Predictive maintenance
+
+
+
+2. Data Understanding
+
+Time series data from velocity and acceleration measurement was provided for 7 machines and 6 sensors for each machine.
+
+Initial understanding the data was complicated, due to the high amount of records and not well structured dataset. However, this is often the case in real-life problems, so here is a list of prep actions that we have taken:
+
+Aggregated data on machine, sensor type, hourly basis, daily basis
+We are using max daily value
+Filled in missing dates from the time series and padded the values with the value from the closest date
+
+
+To understand what data we have it is important to look at descriptive statistics and explore graphs.
+
+Additional data was provided for some of the maintenance events like grinding the rails and change of parts.
+
+An example plot for daily max values of effective Velocity of RBG1  from drive_gear sensor:
+
+
+
+3. Data Preparation
+
+3.1 Time series components
+
+Since data is provided as a time series, it makes sense to look at standard analytics (unit root test, acf, pacf).
+
+As expected, unit root test of the series showed that data is non-stationary.
+
+ACF and PACF results show significant lags to be present in the series.
+
+ACF:
+
+
+
+PACF:
+
+
+
+3.2 Fourier transform
+
+Fourrier transform was applied to a dummy variable that shows whether tests where run on that date or not.
+
+Results show strong cyclical component on approximately 100 days:
+
+
+
+Our main assumption is, that these 100-days cycle is a regular maintenance of the machine (like grinding, changing parts, setup, etc.). However, this was not confirmed by the repair records data provided by the organizers.
+
+3.3 Missing dates analysis
+
+The number of consequently missing days with observations also may be a strong predictor for the machine performance. For example, if the machine was idle only for a day, it was probably a small maintenance event, while long periods with no observations can suggest a significant failure.
+
+For example, for two of the machines the number of consequent missing days shows the following distribution:
+
+RBG1	RBG7
+1.0	6.0	9.0
+2.0	40.0	70.0
+3.0	12.0	30.0
+4.0	NaN	12.0
+5.0	5.0	NaN
+6.0	NaN	6.0
+7.0	NaN	14.0
+9.0	NaN	9.0
+11.0	NaN	11.0
+13.0	13.0	NaN
+17.0	NaN	17.0
+20.0	40.0	NaN
+28.0	28.0	NaN
+217.0	217.0	NaN

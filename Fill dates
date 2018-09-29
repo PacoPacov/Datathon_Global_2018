@@ -1,0 +1,7 @@
+dates_empty_df = pd.DataFrame([], index = pd.DatetimeIndex(start = '2016-09-02 00:00:00',\
+                                                       end = '2018-07-24 00:00:00', \
+                                                       freq = 'D'))
+RBG1_drive_gear_V_eff_alldates = dates_empty_df.merge(RBG1_drive_gear_V_eff_aggr_daily, how = 'outer',\
+                                                      left_index = True, \
+                                                     right_on = 'date_measurement').set_index('date_measurement')
+RBG1_drive_gear_V_eff_alldates['Max_value'].fillna(method = 'backfill', inplace = True)

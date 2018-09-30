@@ -1,0 +1,23 @@
+## Import the sample data
+## clock the time for import
+
+tic = time.time()
+dateparse = lambda x: pd.datetime.strptime(x, '%d.%m.%Y')
+of = pd.read_csv("Official_Failure 3.csv", parse_dates = [0], date_parser = dateparse)
+
+tac = time.time()
+
+diff = tac - tic
+
+print("Time imprt had taken {a:.2f} seconds".format(a = diff))
+final_err = final.merge(of, how = 'left', left_on = ['machine_name','date_measurement_f'], 
+                        right_on = ['Machine', 'Date'])
+                        
+final_err = final_err.drop(['drive_wheel_a_max_y', 'idle_wheel_V_eff_y',
+ 'idle_wheel_a_max_y', 'drive_gear_V_eff_y', 'drive_gear_a_max_y',
+ 'drive_motor_V_eff_y', 'drive_motor_a_max_y', 'lifting_gear_V_eff_y',
+ 'lifting_gear_a_max_y', 'lifting_motor_V_eff_y',
+ 'lifting_motor_a_max_y', 'Machine', 'Date'], axis = 1)
+
+final_err['Repair'] = final_err['drive_wheel_V_eff_y']
+final_err.drop('drive_wheel_V_eff_y', axis = 1, inplace = True)

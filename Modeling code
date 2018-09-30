@@ -1,0 +1,70 @@
+final['Missing_obs'] = np.where(final['drive_gear_a_max'] > 0,0 ,1)
+count  = 0
+final['Number_of_days_missing'] = pd.Series([])
+for i in range(final.shape[0]):
+    if final['Missing_obs'][i] == 1:
+        count += 1
+    else:
+        for j in range(count):
+            final['Number_of_days_missing'][i - j -1] = count
+        count = 0
+final_err['Repair'] = final_err['drive_wheel_V_eff_y']
+final_err.drop('drive_wheel_V_eff_y', axis = 1, inplace = True)
+
+final_err_dedup = final_err.drop([570, 839, 903, 1196, 1440], axis = 0)
+final_err_dedup[final_err_dedup['Repair'] == 1]
+final_err_dedup['Sum_rolling_mean_a'] = final_err_dedup['Rolling_mean_drive_gear_a_max'] + \
+final_err_dedup['Rolling_mean_drive_motor_a_max'] + \
+final_err_dedup['Rolling_mean_drive_wheel_a_max'] + \
+final_err_dedup['Rolling_mean_idle_wheel_a_max'] + \
+final_err_dedup['Rolling_mean_lifting_gear_a_max'] + \
+final_err_dedup['Rolling_mean_lifting_motor_a_max']
+
+final_err_dedup = final_err_dedup.set_index('date_measurement_f')
+
+final_err_dedup['Flag_high_rolling_mean'] = np.where(final_err_dedup['Sum_rolling_mean_a'] < 4*final_err_dedup['Sum_rolling_mean_a'].std(), 1, 0)
+
+
+final_err_dedup['Outcome'] = pd.Series([])
+for i in range(final_err_dedup.shape[0]):
+    if final_err_dedup['Repair'][i] == 1:
+        final_err_dedup['Outcome'][i] = 1
+    elif final_err_dedup['Number_of_days_missing'][i] < 3:
+        final_err_dedup['Outcome'][i] = 0
+    elif (final_err_dedup['drive_gear_V_eff_x'][i] == final_err_dedup['drive_gear_V_eff_x'][i]) & \
+         (final_err_dedup['drive_gear_V_eff_x'][i-1] != final_err_dedup['drive_gear_V_eff_x'][i-1]):
+        final_err_dedup['Outcome'][i] = 0
+    elif (final_err_dedup['Flag_high_rolling_mean'][i] == 0) \
+    & (final_err_dedup['drive_gear_V_eff_x'][i] == final_err_dedup['drive_gear_V_eff_x'][i]):
+        final_err_dedup['Outcome'][i] = 1
+    else:
+        final_err_dedup['Outcome'][i] = 0
+                
+
+for machine in ['RBG1', 'RBG2', 'RBG3', 'RBG4', 'RBG5', 'RBG6', 'RBG7']:
+    print(machine)
+    # Predicting the Test set results
+    vars()['y_'+machine] = final_err_dedup['Outcome'][final_err_dedup['machine_name'] == machine].fillna(0)
+    vars()['X_'+machine] = final_err_dedup[final_err_dedup['machine_name'] == machine].drop(['Outcome', \
+                                  'machine_name', 'Repair', 'Flag_high_rolling_mean'], axis = 1).fillna(0)
+    smt = SMOTE()
+    vars()['X_enchanced_'+machine], vars()['y_enchanced_'+machine] = \
+            smt.fit_sample(vars()['X_'+machine] , vars()['y_'+machine])
+    vars()['X_train_'+machine], vars()['X_test_'+machine],\
+        vars()['y_train_'+machine], vars()['y_test_'+machine] = \
+        train_test_split(vars()['X_enchanced_'+machine], \
+        vars()['y_enchanced_'+machine], test_size = 0.25, random_state = 0)
+    parameters = [{'C': [1, 10, 100, 1000], 'kernel': ['linear']},
+              {'C': [1, 10, 100, 1000], 'kernel': ['rbf'], 'gamma': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]}]
+    grid_search = GridSearchCV(estimator = classifier,
+                               param_grid = parameters,
+                               scoring = 'accuracy',
+                               cv = 10,
+                               n_jobs = -1)
+    grid_search = grid_search.fit(vars()['X_train_'+machine], vars()['y_train_'+machine])
+    best_parameters = grid_search.best_params_
+    print(best_parameters)
+    vars()['classifier_'+machine] = SVC(C = best_parameters['C'], kernel = best_parameters['kernel'], \
+                                        random_state = 0)
+    vars()['classifier_'+machine].fit(vars()['X_train_'+machine], vars()['y_train_'+machine])
+    

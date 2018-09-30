@@ -1,0 +1,25 @@
+final['Missing_obs'] = np.where(final['drive_gear_a_max'] > 0, 0, 1)
+count = 0
+final['Nr_days_missing'] = pd.Series([])
+for i in range(final.shape[0]):
+    if final['Missing_obs'][i] == 1:
+        count+=1
+    else:
+        for j in range(count):
+            final['Nr_days_missing'][i-j-1] = count 
+        count = 0
+
+final.set_index('date_measurement_f', inplace = True)
+
+
+for sensor in ['drive_gear_V_eff',
+       'drive_gear_a_max', 'drive_motor_V_eff', 'drive_motor_a_max',
+       'drive_wheel_V_eff', 'drive_wheel_a_max', 'idle_wheel_V_eff',
+       'idle_wheel_a_max', 'lifting_gear_V_eff', 'lifting_gear_a_max',
+       'lifting_motor_V_eff', 'lifting_motor_a_max']:
+    final['Rolling_mean_'+sensor] = final[sensor].rolling(7).mean()
+    final['Rolling_std_'+sensor] = final[sensor].rolling(7).std()
+    final['Rolling_max_'+sensor] = final[sensor].rolling(7).max()
+    final['Rolling_diff_'+sensor] = final[sensor].diff()
+    
+    

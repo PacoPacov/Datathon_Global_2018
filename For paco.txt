@@ -1,0 +1,3 @@
+y_pred_RBG1 = classifier.predict(X_RBG1)
+cm_RBG1 = confusion_matrix(y_RBG1, y_pred_RBG1)
+cm_RBG1

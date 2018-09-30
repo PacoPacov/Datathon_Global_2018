@@ -1,0 +1,7 @@
+Date,Machine,drive_wheel_V_eff,drive_wheel_a_max,idle_wheel_V_eff,idle_wheel_a_max,drive_gear_V_eff,drive_gear_a_max,drive_motor_V_eff,drive_motor_a_max,lifting_gear_V_eff,lifting_gear_a_max,lifting_motor_V_eff,lifting_motor_a_max
+13.11.2017,RBG1,1,1,1,1,0,0,0,0,0,0,0,0
+08.02.2018,RBG1,1,1,1,1,0,0,0,0,0,0,0,0
+14.02.2018,RBG1,1,1,1,1,0,0,0,0,0,0,0,0
+05.04.2018,RBG2,1,1,1,1,0,0,0,0,0,0,0,0
+05.04.2018,RBG3,1,1,1,1,0,0,1,1,0,0,0,0
+08.04.2018,RBG7,1,1,1,1,0,0,0,0,0,0,0,0

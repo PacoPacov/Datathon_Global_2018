@@ -1,0 +1,47 @@
+Predictor characteristics
+The following rolling characteristics were developed:
+- Rolling mean with window 7 days
+- Rolling std with window 7 days
+- Rolling max with window 7 days
+- Rolling min with window 7 days
+- Rolling difference with lag 1 day
+
+The dates when maintenance activities have been performed were flagged as an additional variable.
+
+Outcome definition
+The outcome is defined according to the following rules:
+Failures:
+  - Maintenance/repairs of the machines
+  - Values where sum of rolling means of acceleration values exceeds 4 times the standard deviation of the sum
+ Non-failures:
+  - All other cases
+Outcome flag distribution:
+Failures:
+  51 cases
+Non-failures:
+  3372 days
+  
+SMOTE oversampling
+
+Because of the small number of failures a synthetic oversampling technique was used in order to multiplicate the records.
+Synthetic data points where created as additional failure records. The smaller subpopulation in the classification output
+is made to be the same number of observation as the other class. In the our case the number of
+failures is synteticaly oversampled to be equal to the non-failures. This has been done only to build a classification model. After that the
+classification object has used on non-syntetic original data.
+
+
+Modeling
+A Support Vector Machine is built as a classification approach. In order to use the computing process in the most efficient way,
+the kernel version of this model is used. Grid search is performed to optimize the performance of the model and the kernel, gamma
+and C parameters were tuned in order to select the best performing model. 
+
+Validation
+All of the models were validated with hold-out sample which is 25% of each machine observations.
+
+Performance
+Confusion matices were creted on the validation to assess the discrimination performance of the model. The model has shown f1 score of
+
+Deployment
+
+The model can be used to build an application that returns a value of 0 when the current state of the machine doesn't show high probability of failure, and 1 if the machine is about to fail.
+New data can be added on daily or weekly basis and the retrained model can be used to predict the class of the current state of the machine.
